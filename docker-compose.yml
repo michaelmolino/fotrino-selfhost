@@ -29,8 +29,6 @@ services:
     image: michaelmolino/mock-oauth-server
     volumes:
       - ./ssl:/ssl
-    environment:
-      USER_INFO: '{ "email_verified": true, "sub": "1", "name": "Fotrino", "picture": "https://fotrino:4443/statics/oauth/polaroid-camera.png"}'
     ports:
       - 4444:4444
     restart: always
