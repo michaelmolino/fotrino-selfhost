@@ -1,0 +1,98 @@
+version: "2"
+
+services:
+  postgres:
+    image: postgres:12
+    volumes:
+      - ./postgres:/var/lib/postgresql/data/pgdata
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: fotrino
+      POSTGRES_PASSWORD: fotrino
+    restart: always
+
+  redis:
+    image: redis:5
+    restart: always
+
+  minio:
+    image: minio/minio
+    volumes:
+      - ./minio:/data
+      - ./ssl:/ssl
+    command: server --certs-dir=/ssl /data
+    ports:
+      - 9000:9000
+    restart: always
+
+  mock-oauth-server:
+    image: michaelmolino/mock-oauth-server
+    volumes:
+      - ./ssl:/ssl
+    environment:
+      USER_INFO: '{ "email_verified": true, "sub": "1", "name": "Fotrino", "picture": "https://127.0.0.1:4443/statics/oauth/polaroid-camera.png"}'
+    restart: always
+
+  fotrino-worker:
+    image: michaelmolino/fotrino-worker
+    depends_on:
+      - redis
+      - postgres
+      - minio
+    volumes:
+      - ./ssl:/ssl
+    environment:
+      - SSL_CERT_FILE=/ssl/public.crt
+      - FOTRINO_REDIS_HOST=redis
+      - FOTRINO_POSTGRES_HOST=postgres
+      - FOTRINO_MINIO_HOST=minio:9000
+      - FOTRINO_MINIO_SECURE=True
+    restart: always
+
+  fotrino-backend:
+    image: michaelmolino/fotrino-backend
+    depends_on:
+      - postgres
+      - redis
+      - minio
+      - mock-oauth-server
+    volumes:
+      - ./ssl:/ssl
+    environment:
+      - CURL_CA_BUNDLE=
+      - SSL_CERT_FILE=/ssl/public.crt
+      - FOTRINO_SECRET_KEY=b'\xe3\xcf\x82\ne\x11?\xc2\xeb\x07U\x012;x\xdc\x10\xdc\xd8&\x89\xba\xf4\x1d'
+      - FOTRINO_REDIS_HOST=redis
+      - FOTRINO_POSTGRES_HOST=postgres
+      - FOTRINO_MINIO_HOST=minio:9000
+      - FOTRINO_MINIO_SECURE=True
+      - FOTRINO_HYDRA_HOST=mock-oauth-server:4444
+    restart: always
+
+  fotrino-frontend:
+    image: michaelmolino/fotrino-frontend
+    restart: always
+
+  nginx:
+    image: nginx
+    depends_on:
+      - fotrino-backend
+      - fotrino-frontend
+      - mock-oauth-server
+    volumes:
+      - ./nginx:/config
+      - ./nginx/site-confs:/etc/nginx/conf.d
+      - ./ssl:/ssl
+    ports:
+      - 4443:443
+      - 4444:443
+    restart: always
+
+  dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - postgres
+      - redis
+      - minio
+      - mock-oauth-server
+    command: postgres:5432 redis:6379 minio:9000 mock-oauth-server:4444

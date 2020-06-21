@@ -1,0 +1,6 @@
+.DS_Store
+minio/
+postgres/
+ssl/private.key
+ssl/public.crt
+ssl/CAs
