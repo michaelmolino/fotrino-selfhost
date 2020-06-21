@@ -30,7 +30,7 @@ services:
     volumes:
       - ./ssl:/ssl
     environment:
-      USER_INFO: '{ "email_verified": true, "sub": "1", "name": "Fotrino", "picture": "https://127.0.0.1:4443/statics/oauth/polaroid-camera.png"}'
+      USER_INFO: '{ "email_verified": true, "sub": "1", "name": "Fotrino", "picture": "https://fotrino:4443/statics/oauth/polaroid-camera.png"}'
     restart: always
 
   fotrino-worker:
