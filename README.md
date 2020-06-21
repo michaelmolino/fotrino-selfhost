@@ -46,7 +46,7 @@ docker-compose down
 #### Troubleshooting
 
 Your browser should complain that fotrino cannot be trusted.  You should visit each of these domains and accept the certificate.
-- https://mock-oauth-server:4444
+- https://mock-oauth-server:4444 (a 404 is OK)
 - https://minio:9000
 - https://fotrino:4443
 

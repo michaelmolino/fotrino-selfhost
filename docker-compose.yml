@@ -31,6 +31,8 @@ services:
       - ./ssl:/ssl
     environment:
       USER_INFO: '{ "email_verified": true, "sub": "1", "name": "Fotrino", "picture": "https://fotrino:4443/statics/oauth/polaroid-camera.png"}'
+    ports:
+      - 4444:4444
     restart: always
 
   fotrino-worker:
@@ -85,7 +87,6 @@ services:
       - ./ssl:/ssl
     ports:
       - 4443:443
-      - 4444:443
     restart: always
 
   dependencies:
