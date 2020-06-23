@@ -4,3 +4,4 @@ postgres/
 ssl/private.key
 ssl/public.crt
 ssl/CAs
+docker-compose-dev.yml
